@@ -6,6 +6,8 @@ export interface IBaseService<T> {
 
   findById(id: EntityId): Promise<T>;
 
+  findOne(filter: any): Promise<T>;
+
   findByIds(id: [EntityId]): Promise<T[]>;
 
   store(data: any): Promise<T>;

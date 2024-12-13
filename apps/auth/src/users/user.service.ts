@@ -1,4 +1,8 @@
-import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { CreateUserRequest } from './dto/create-user.request';
 import { User } from './entities/user.entity';
 import * as bcrypt from 'bcryptjs';
@@ -39,5 +43,18 @@ export class UsersService extends BaseService<User> {
     if (user) {
       throw new UnprocessableEntityException('Email already exists.');
     }
+  }
+
+  async validateUser(email: string, password: string) {
+    const user = await this.usersRepository.findOne({ where: { email } });
+    const passwordIsValid = await bcrypt.compare(password, user.password);
+    if (!passwordIsValid) {
+      throw new UnauthorizedException('Credentials are not valid.');
+    }
+    return user;
+  }
+
+  async getUser(getUserArgs: Partial<User>) {
+    return this.findOne(getUserArgs);
   }
 }

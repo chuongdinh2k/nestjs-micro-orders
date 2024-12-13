@@ -1,7 +1,10 @@
 // database-orders.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '../users/entities/user.entity';
+import { OrderItem } from '../entities/order-item.entity';
+import { Order } from '../entities/orders.entity';
+import { Payment } from '../entities/payment.entity';
+import { Shipping } from '../entities/shipping.entity';
 
 @Module({
   imports: [
@@ -11,8 +14,14 @@ import { User } from '../users/entities/user.entity';
       port: 3306,
       username: 'root',
       password: '',
-      database: 'auth_db',
-      entities: [User],
+      database: 'orders_db',
+      entities: [
+        // your orders entities here
+        OrderItem,
+        Order,
+        Payment,
+        Shipping,
+      ],
       synchronize: true,
     }),
   ],

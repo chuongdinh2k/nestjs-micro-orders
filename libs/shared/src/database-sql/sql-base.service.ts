@@ -14,6 +14,10 @@ export class BaseService<T extends BaseEntity> {
     return this.repository.find();
   }
 
+  async findOne(filter: any): Promise<T> {
+    return this.repository.findOne({ where: filter });
+  }
+
   async findById(id: EntityId): Promise<T> {
     return this.repository.findOne(id as any);
   }
