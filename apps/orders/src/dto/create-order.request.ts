@@ -1,14 +1,12 @@
 import { Type } from 'class-transformer';
 import {
   IsArray,
-  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsString,
   MaxLength,
   ValidateNested,
 } from 'class-validator';
-import { EOrderStatus } from '../types/order-status.enum';
 
 export class Item {
   @IsNotEmpty()

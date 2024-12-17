@@ -4,3 +4,6 @@ export * from './database-nosql/database-nosql.module';
 export * from './database-sql/sql-base.service';
 export * from './rmq/rmq.module';
 export * from './rmq/rmq.service';
+export * from './types/payment.enum';
+export * from './types/order-status.enum';
+export * from './types/transaction-status.enum';

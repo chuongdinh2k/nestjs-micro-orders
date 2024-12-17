@@ -10,6 +10,7 @@ async function bootstrap() {
   app.connectMicroservice<RmqOptions>(rmqService.getOptions('AUTH', true));
   app.useGlobalPipes(new ValidationPipe());
   await app.startAllMicroservices();
-  await app.listen(process.env.port ?? 3001);
+  await app.listen(process.env.PORT ?? 3001);
+  console.log(`Microservice AUTH started on port ${process.env.PORT}`);
 }
 bootstrap();

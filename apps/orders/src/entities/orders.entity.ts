@@ -12,7 +12,7 @@ import {
 import { OrderItem } from './order-item.entity';
 import { Payment } from './payment.entity';
 import { Shipping } from './shipping.entity';
-import { EOrderStatus } from '../types/order-status.enum';
+import { EOrderStatus } from '@app/shared';
 
 @Entity({ name: 'orders' })
 export class Order extends BaseEntity {
