@@ -24,8 +24,8 @@ export class Trx extends BaseEntity {
   @Column({ name: 'order_id' })
   orderId: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  amount: number;
+  // @Column({ type: 'decimal', precision: 10, scale: 2 })
+  // amount: number;
 
   @Column({ type: 'enum', enum: EPaymentMethods })
   method: number;

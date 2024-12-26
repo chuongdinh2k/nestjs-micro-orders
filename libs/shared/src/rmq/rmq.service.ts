@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   ClientProxy,
-  ClientProxyFactory,
   RmqContext,
   RmqOptions,
   Transport,
@@ -11,18 +10,7 @@ import {
 @Injectable()
 export class RmqService {
   private client: ClientProxy;
-  constructor(private readonly configService: ConfigService) {
-    this.client = ClientProxyFactory.create({
-      transport: Transport.RMQ,
-      options: {
-        urls: [this.configService.get<string>('RABBIT_MQ_URI')],
-        queue: this.configService.get<string>('RABBIT_MQ_BILLING_QUEUE'),
-        queueOptions: {
-          durable: false,
-        },
-      },
-    });
-  }
+  constructor(private readonly configService: ConfigService) {}
 
   getOptions(queue: string, noAck = false): RmqOptions {
     return {
@@ -40,13 +28,5 @@ export class RmqService {
     const channel = context.getChannelRef();
     const originalMessage = context.getMessage();
     channel.ack(originalMessage);
-  }
-  async checkConnection(): Promise<void> {
-    try {
-      await this.client.connect();
-      console.log('Connected to RabbitMQ');
-    } catch (error) {
-      console.error('Failed to connect to RabbitMQ', error);
-    }
   }
 }

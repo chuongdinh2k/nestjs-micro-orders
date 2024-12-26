@@ -21,8 +21,9 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       validationSchema: Joi.object({
         JWT_SECRET: Joi.string().required(),
         JWT_EXPIRATION: Joi.string().required(),
+        PORT: Joi.number().required(),
       }),
-      envFilePath: './apps/auth/.env',
+      envFilePath: './apps/auth/.env.local',
     }),
     JwtModule.registerAsync({
       useFactory: (configService: ConfigService) => ({

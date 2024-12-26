@@ -47,6 +47,9 @@ export class UsersService extends BaseService<User> {
 
   async validateUser(email: string, password: string) {
     const user = await this.usersRepository.findOne({ where: { email } });
+    if (!user) {
+      throw new UnauthorizedException('Credentials are not valid.');
+    }
     const passwordIsValid = await bcrypt.compare(password, user.password);
     if (!passwordIsValid) {
       throw new UnauthorizedException('Credentials are not valid.');

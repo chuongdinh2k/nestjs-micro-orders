@@ -31,27 +31,31 @@ export class BillingService extends BaseService<Trx> {
     return trx;
   }
   async createTrx(request: CreateTrxRequest): Promise<Trx> {
-    const { amount, method, orderId, userId } = request;
+    const { method, orderId, userId } = request;
     const trxId = uuidv4();
-    const trx = this.transactionRepository.create({
-      orderId,
-      trxId,
-      amount,
-      method,
-      status: 0,
-      userId,
-    });
-    const savedTrx = await this.transactionRepository.save(trx);
-    // Simulate billing processing for 10 seconds
-    setTimeout(async () => {
-      savedTrx.status = 1; // Update status to completed
-      await this.transactionRepository.save(savedTrx);
+    try {
+      const trx = this.transactionRepository.create({
+        orderId,
+        trxId,
+        method,
+        status: 0,
+        userId: 1,
+      });
+      const savedTrx = await this.transactionRepository.save(trx);
+      // Simulate billing processing for 10 seconds
+      setTimeout(async () => {
+        savedTrx.status = 1; // Update status to completed
+        await this.transactionRepository.save(savedTrx);
 
-      // Emit an event to notify the Order service
-      this.queueOrder(savedTrx);
-    }, 10000); // 10 seconds delay
+        // Emit an event to notify the Order service
+        console.log('savedTrx', savedTrx);
+        this.queueOrder(savedTrx);
+      }, 10000); // 10 seconds delay
 
-    return savedTrx;
+      return savedTrx;
+    } catch (err) {
+      console.log('err', err);
+    }
   }
 
   private queueOrder(trx: Trx) {

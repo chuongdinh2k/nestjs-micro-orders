@@ -14,7 +14,6 @@ export class BillingController {
 
   @Get('health')
   healthCheck(): string {
-    console.log('runhete');
     return this.billingService.checkHealth();
   }
 
@@ -37,12 +36,10 @@ export class BillingController {
   // @UseGuards(JwtAuthGuard)
   async handleOrderCreated(@Payload() data: any, @Ctx() context: RmqContext) {
     console.log('received data: ', data);
-    try {
-      await this.billingService.createTrx(data);
+    const trx = await this.billingService.createTrx(data);
+    if (trx) {
       this.rmqService.ack(context);
-    } catch (error) {
-      console.error('Error processing order_created event', error);
-      // Optionally, you can implement a retry mechanism here
     }
+    this.rmqService.ack(context);
   }
 }

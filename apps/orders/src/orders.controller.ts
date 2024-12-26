@@ -1,13 +1,26 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderRequest } from './dto/create-order.request';
 import { Order } from './entities/orders.entity';
-import { EventPattern } from '@nestjs/microservices';
+import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 import { IBillingStatusPayload } from './types/payload.interface';
+import { JwtAuthGuard, RmqService } from '@app/shared';
+import { transformOrderData } from './helpers/transform-data';
 
 @Controller('orders')
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(
+    private readonly ordersService: OrdersService,
+    private readonly rmqService: RmqService,
+  ) {}
 
   @Get('health')
   healthCheck(): string {
@@ -15,8 +28,12 @@ export class OrdersController {
   }
 
   @Post()
-  createOrder(@Body() order: CreateOrderRequest): Promise<Order> {
-    return this.ordersService.createOrder(order);
+  @UseGuards(JwtAuthGuard)
+  createOrder(
+    @Body() order: CreateOrderRequest,
+    @Req() req: any,
+  ): Promise<Order> {
+    return this.ordersService.createOrder(order, req.cookies?.Authentication);
   }
 
   @Get()
@@ -25,21 +42,21 @@ export class OrdersController {
   }
 
   @Get(':id')
-  getOrderById(@Param('id') id: number): Promise<Order> {
-    return this.ordersService.getOrder({ id });
+  async getOrderById(@Param('id') id: number) {
+    return transformOrderData(await this.ordersService.getOrder({ id }));
   }
 
   @EventPattern('billing_process')
-  async handleBillingStatus(payload: IBillingStatusPayload) {
-    try {
-      console.log('received data: ', payload);
-      const order = await this.ordersService.updateOrderStatus(
-        payload.orderId,
-        payload.status,
-      );
-      console.log('Order status updated: ', order);
-    } catch (error) {
-      console.error('Error processing billing_status event', error);
+  async handleBillingStatus(
+    @Payload() payload: IBillingStatusPayload,
+    @Ctx() context: RmqContext,
+  ) {
+    const order = await this.ordersService.updateOrderStatus(
+      payload.orderId,
+      payload.status,
+    );
+    if (order) {
+      this.rmqService.ack(context);
     }
   }
 }

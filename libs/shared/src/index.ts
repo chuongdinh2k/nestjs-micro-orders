@@ -7,3 +7,7 @@ export * from './rmq/rmq.service';
 export * from './types/payment.enum';
 export * from './types/order-status.enum';
 export * from './types/transaction-status.enum';
+export * from './auth/auth.module';
+export * from './auth/jwt-auth.guard';
+export * from './database-nosql/abstract.repository';
+export * from './database-nosql/abstract.schema';

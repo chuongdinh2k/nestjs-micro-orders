@@ -1,4 +1,9 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Order } from './entities/orders.entity';
 import { BaseService, EOrderStatus, ETransactionStatus } from '@app/shared';
 import { CreateOrderRequest, Item } from './dto/create-order.request';
@@ -9,6 +14,7 @@ import { PaymentService } from './payment/payment.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ClientProxy, EventPattern } from '@nestjs/microservices';
 import { transformOrderData } from './helpers/transform-data';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class OrdersService extends BaseService<Order> {
@@ -44,11 +50,10 @@ export class OrdersService extends BaseService<Order> {
       .leftJoinAndSelect('order.shipping', 'shipping')
       .where('order.id = :id', { id: getOrderArgs.id })
       .getOne();
-    console.log('order', order);
     if (!order) {
       throw new NotFoundException('Order not found');
     }
-    return transformOrderData(order);
+    return order;
   }
 
   async createOrderItem(
@@ -68,7 +73,10 @@ export class OrdersService extends BaseService<Order> {
     return manager.save(OrderItem, orderItem);
   }
 
-  async createOrder(request: CreateOrderRequest): Promise<Order> {
+  async createOrder(
+    request: CreateOrderRequest,
+    authToken: string,
+  ): Promise<Order> {
     const { items, userId, shippingId, paymentId } = request;
     const shipping = await this.shippingService.getShipping({
       id: shippingId,
@@ -78,24 +86,38 @@ export class OrdersService extends BaseService<Order> {
     if (!shipping || !payment) {
       throw new Error('Shipping or payment not found');
     }
+
     return this.connection.transaction(async (manager: EntityManager) => {
-      const order = manager.create(Order, {
-        shipping,
-        status: 0, // default is pending
-        userId,
-        totalAmount,
-        payment,
-      });
+      try {
+        await lastValueFrom(
+          this.billingClient.emit('order_created', {
+            request,
+            Authentication: authToken,
+          }),
+        );
 
-      const savedOrder = await manager.save(Order, order);
+        const order = manager.create(Order, {
+          shipping,
+          status: 0, // default is pending
+          userId,
+          totalAmount,
+          payment,
+        });
 
-      const orderItemsPromises = items.map((item) =>
-        this.createOrderItem(item, savedOrder, manager),
-      );
+        const savedOrder = await manager.save(Order, order);
 
-      await Promise.all(orderItemsPromises);
-      this.queueBilling(savedOrder);
-      return savedOrder;
+        const orderItemsPromises = items.map((item) =>
+          this.createOrderItem(item, savedOrder, manager),
+        );
+
+        await Promise.all(orderItemsPromises);
+        this.queueBilling(savedOrder);
+
+        return savedOrder;
+      } catch (error) {
+        console.error('Error during transaction:', error);
+        throw new InternalServerErrorException('Failed to create order');
+      }
     });
   }
 
@@ -105,7 +127,8 @@ export class OrdersService extends BaseService<Order> {
       .emit('order_created', {
         orderId: order.id,
         userId: order.userId,
-        amount: order.totalAmount,
+        shippingId: order.shipping.id,
+        method: order.payment.method,
       })
       .subscribe({
         next: () =>

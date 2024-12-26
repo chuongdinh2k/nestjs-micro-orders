@@ -23,6 +23,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate({ email }: TokenPayload) {
+    console.log('email', email);
     try {
       return await this.usersService.getUser({
         email,

@@ -8,10 +8,6 @@ export class CreateTrxRequest {
 
   @IsNotEmpty()
   @IsNumber()
-  amount: number;
-
-  @IsNotEmpty()
-  @IsNumber()
   @IsEnum(EPaymentMethods)
   method: number;
 

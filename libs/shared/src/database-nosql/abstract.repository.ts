@@ -32,12 +32,6 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
 
   async findOne(filterQuery: FilterQuery<TDocument>): Promise<TDocument> {
     const document = await this.model.findOne(filterQuery, {}, { lean: true });
-
-    if (!document) {
-      this.logger.warn('Document not found with filterQuery', filterQuery);
-      throw new NotFoundException('Document not found.');
-    }
-
     return document as unknown as TDocument;
   }
 
@@ -69,8 +63,17 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
     });
   }
 
-  async find(filterQuery: FilterQuery<TDocument>) {
-    return this.model.find(filterQuery, {}, { lean: true });
+  async find(filterQuery: FilterQuery<TDocument>, skip: number, limit: number) {
+    return this.model
+      .find(filterQuery, {}, { lean: true })
+      .skip(skip)
+      .limit(limit)
+      .exec();
+  }
+  async countDocuments(
+    filterQuery: FilterQuery<TDocument> = {},
+  ): Promise<number> {
+    return this.model.countDocuments(filterQuery).exec();
   }
 
   async startTransaction() {

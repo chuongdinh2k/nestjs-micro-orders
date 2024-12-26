@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
-import { RmqModule, SharedModule } from '@app/shared';
+import { AuthModule, RmqModule, SharedModule } from '@app/shared';
 import { DatabaseOrdersModule } from './database/database.module';
 import { ShippingModule } from './shipping/shipping.module';
 import { Order } from './entities/orders.entity';
@@ -22,7 +22,7 @@ import * as Joi from 'joi';
       validationSchema: Joi.object({
         PORT: Joi.number().required(),
       }),
-      envFilePath: './apps/orders/.env',
+      envFilePath: './apps/orders/.env.local',
     }),
     TypeOrmModule.forFeature([Order, OrderItem, Payment, Shipping]),
     SharedModule,
@@ -32,6 +32,7 @@ import * as Joi from 'joi';
     RmqModule.register({
       name: 'BILLING',
     }),
+    AuthModule,
   ],
   controllers: [OrdersController],
   providers: [OrdersService, ShippingService, PaymentService],

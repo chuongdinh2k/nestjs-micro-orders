@@ -3,7 +3,6 @@ import { Order } from '../entities/orders.entity';
 
 export const transformOrderData = (data: Order) => {
   const { id, items, shipping, payment, totalAmount, userId, status } = data;
-  console.log('item', items);
   return {
     id,
     userId,
