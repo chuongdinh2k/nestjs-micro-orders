@@ -1,4 +1,5 @@
 import {
+  Inject,
   Injectable,
   UnauthorizedException,
   UnprocessableEntityException,
@@ -7,13 +8,13 @@ import { CreateUserRequest } from './dto/create-user.request';
 import { User } from './entities/user.entity';
 import * as bcrypt from 'bcryptjs';
 import { BaseService } from '@app/shared';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { USER_REPOSITORY } from '../constants';
 
 @Injectable()
 export class UsersService extends BaseService<User> {
   constructor(
-    @InjectRepository(User) private readonly usersRepository: Repository<User>,
+    @Inject(USER_REPOSITORY) private readonly usersRepository: Repository<User>,
   ) {
     super(usersRepository);
   }

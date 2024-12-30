@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { RmqModule, SharedModule } from '@app/shared';
-import { DatabaseOrdersModule } from './database/database.module';
+import { DatabaseAuthModule } from './database/database.module';
 import { UserModule } from './users/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -14,7 +14,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
   imports: [
     SharedModule,
     RmqModule,
-    DatabaseOrdersModule,
+    DatabaseAuthModule,
     UserModule,
     ConfigModule.forRoot({
       isGlobal: true,

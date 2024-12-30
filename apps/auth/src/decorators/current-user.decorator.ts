@@ -2,7 +2,6 @@ import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { User } from '../users/entities/user.entity';
 
 export const getCurrentUserByContext = (context: ExecutionContext): User => {
-  console.log(context.getType());
   if (context.getType() === 'http') {
     return context.switchToHttp().getRequest().user;
   }

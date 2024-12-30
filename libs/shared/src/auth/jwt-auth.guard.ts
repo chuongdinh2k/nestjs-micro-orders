@@ -16,7 +16,6 @@ export class JwtAuthGuard implements CanActivate {
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const authentication = this.getAuthentication(context);
-    console.log(authentication);
     return this.authClient
       .send('validate_user', {
         Authentication: authentication,
@@ -26,7 +25,6 @@ export class JwtAuthGuard implements CanActivate {
           this.addUser(res, context);
         }),
         catchError(() => {
-          console.log('runhere');
           throw new UnauthorizedException('Credentials are not valid.');
         }),
       );

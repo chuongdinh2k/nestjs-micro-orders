@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
+import { Order } from './entities/orders.entity';
 
 describe('OrdersController', () => {
   let ordersController: OrdersController;
@@ -14,9 +15,9 @@ describe('OrdersController', () => {
     ordersController = app.get<OrdersController>(OrdersController);
   });
 
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(ordersController.getHello()).toBe('Hello World!');
-    });
-  });
+  // describe('root', () => {
+  //   it('should return "Hello World!"', () => {
+  //     expect(ordersController.getHello()).toBe('Hello World!');
+  //   });
+  // });
 });

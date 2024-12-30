@@ -48,7 +48,6 @@ export class BillingService extends BaseService<Trx> {
         await this.transactionRepository.save(savedTrx);
 
         // Emit an event to notify the Order service
-        console.log('savedTrx', savedTrx);
         this.queueOrder(savedTrx);
       }, 10000); // 10 seconds delay
 
